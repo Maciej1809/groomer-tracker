@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Groomer">
+<meta name="theme-color" content="#2d6a4f">
+<title>🐾 Groomer Tracker</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#f2ede4;--card:#fffef9;--card2:#ebe6d8;
+  --ink:#1c1810;--ink2:#7a6f5e;
+  --green:#2d6a4f;--greenL:#d8f3dc;--green2:#52b788;
+  --red:#c0392b;--redL:#fdecea;--bdr:#ddd5c0;
+}
+body{font-family:-apple-system,"Helvetica Neue",sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;min-height:-webkit-fill-available}
+header{background:var(--green);color:white;padding:env(safe-area-inset-top,16px) 16px 12px;position:sticky;top:0;z-index:50}
+header h1{font-size:20px;font-weight:800;letter-spacing:-.3px;margin-top:8px}
+header p{font-size:11px;opacity:.7;margin-top:2px}
+.saving-badge{font-size:11px;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;margin-left:8px}
+
+.tabs{display:flex;gap:4px;background:var(--card2);border-radius:11px;padding:4px;margin:12px 12px 0}
+.tab{flex:1;padding:9px 4px;border:none;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:var(--ink2);line-height:1.4;transition:all .15s}
+.tab.active{background:var(--card);color:var(--green);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+
+.content{padding:12px 12px 100px}
+
+.card{background:var(--card);border-radius:14px;padding:16px;border:1px solid var(--bdr);box-shadow:0 2px 10px rgba(0,0,0,.05);margin-bottom:12px}
+.lbl{display:block;font-size:11px;font-weight:700;color:var(--ink2);letter-spacing:.6px;text-transform:uppercase;margin-bottom:5px}
+input{width:100%;padding:11px 13px;border:1.5px solid var(--bdr);border-radius:9px;background:var(--bg);color:var(--ink);font-family:inherit;font-size:16px;outline:none;-webkit-appearance:none;appearance:none}
+input:focus{border-color:var(--green2)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+
+.btn{border:none;border-radius:9px;font-family:inherit;font-weight:700;cursor:pointer;font-size:15px;padding:12px 16px}
+.btn-green{background:var(--green);color:white;width:100%}
+.btn-light{background:var(--greenL);color:var(--green);width:100%}
+.btn-danger{background:var(--redL);color:var(--red);padding:6px 10px;font-size:14px;border-radius:8px}
+
+.section-title{font-weight:800;font-size:15px;margin-bottom:12px}
+.sub-title{color:var(--green);font-weight:700;font-size:15px;margin-bottom:12px}
+
+.dog-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bdr)}
+.dog-num{width:28px;height:28px;border-radius:50%;background:var(--greenL);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0}
+.dog-name{font-weight:700;font-size:15px}
+.dog-breed{color:var(--ink2);font-size:13px}
+
+.prov-box{background:var(--greenL);border-radius:10px;padding:12px 14px;margin:12px 0}
+.prov-row{display:flex;justify-content:space-between;align-items:center}
+.prov-label{color:var(--green);font-size:13px;font-weight:600}
+.prov-value{font-family:monospace;font-size:22px;font-weight:800;color:var(--green)}
+.prov-sub{display:flex;justify-content:space-between;margin-bottom:4px}
+.prov-sub span{color:var(--ink2);font-size:13px}
+
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat{background:var(--card2);border-radius:10px;padding:12px 8px;text-align:center;border:1px solid var(--bdr)}
+.stat.hi{background:var(--green);border-color:var(--green)}
+.stat .sv{font-weight:800;font-size:15px;color:var(--green);line-height:1.2}
+.stat.hi .sv{color:white}
+.stat .sl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink2);margin-top:3px}
+.stat.hi .sl{color:rgba(255,255,255,.7)}
+
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.chips::-webkit-scrollbar{display:none}
+.chip{white-space:nowrap;padding:7px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--bdr);background:var(--card);color:var(--ink2)}
+.chip.active{background:var(--green);color:white;border-color:var(--green)}
+
+.day-block{border:1px solid var(--bdr);border-radius:11px;margin-bottom:10px;overflow:hidden}
+.day-header{background:var(--card2);padding:9px 14px;display:flex;justify-content:space-between;align-items:center}
+.day-hdate{font-weight:700;font-size:14px}
+.day-hinfo{font-size:12px;color:var(--ink2)}
+.day-dog{display:flex;align-items:center;gap:10px;padding:9px 14px;border-top:1px solid var(--bdr);background:var(--card)}
+.day-footer{background:var(--greenL);padding:8px 14px;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center}
+.day-footer-label{color:var(--green);font-size:13px;font-weight:600}
+.day-footer-val{font-family:monospace;font-weight:800;font-size:15px;color:var(--green)}
+.total-bar{background:var(--green);border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.total-bar-val{font-family:monospace;font-size:26px;font-weight:800;color:white}
+.total-bar-lbl{color:rgba(255,255,255,.7);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.total-bar-sub{color:rgba(255,255,255,.6);font-size:12px;margin-top:2px}
+
+.empty{text-align:center;padding:36px 0;color:var(--ink2)}
+.empty-icon{font-size:40px;margin-bottom:10px}
+
+.toast{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:white;padding:11px 22px;border-radius:9px;font-size:14px;font-weight:600;z-index:200;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.25);transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:16px;background:var(--bg)}
+.loading-icon{font-size:48px;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="loading">
+    <div class="loading-icon">🐾</div>
+    <div style="font-size:16px;color:var(--ink2)">Ładowanie…</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const MONTHS=['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec',
+              'Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+
+// ── state ────────────────────────────────────────────────
+let days=[];
+let session=[];
+let activeMonth=todayStr().slice(0,7);
+let currentTab='dodaj';
+let saving=false;
+let curDate=todayStr();
+let curPct='40';
+
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function monthKey(d){return d.slice(0,7);}
+function fmtDate(s){const[y,m,d]=s.split('-');return`${d}.${m}.${y}`;}
+function fmtPLN(n){return Number(n).toFixed(2).replace('.',',')+' zł';}
+function monthLabel(ym){const[y,m]=ym.split('-');return MONTHS[parseInt(m)-1]+' '+y;}
+function uid(){return Date.now()+'_'+Math.random().toString(36).slice(2,6);}
+
+// ── storage ──────────────────────────────────────────────
+function saveData(){
+  try{localStorage.setItem('grm_days',JSON.stringify(days));return true;}
+  catch(e){showToast('⚠️ Błąd zapisu — pełna pamięć?');return false;}
+}
+function loadData(){
+  try{
+    const d=localStorage.getItem('grm_days');
+    const p=localStorage.getItem('grm_pct');
+    if(d)days=JSON.parse(d);
+    if(p)curPct=p;
+    // import ze starej wersji (zapisywała tylko sumę dnia)
+    const old=localStorage.getItem('groomer_entries');
+    if(old && !localStorage.getItem('grm_migrated')){
+      JSON.parse(old).forEach(e=>{
+        const n=Math.max(1,e.dogs||1);
+        const dogs=[];
+        for(let i=0;i<n;i++)dogs.push({id:uid(),name:'Pies '+(i+1),breed:e.note||'',price:(e.total||0)/n});
+        const ex=days.find(x=>x.date===e.date);
+        if(ex){ex.dogs.push(...dogs);ex.total+=e.total||0;ex.prov=ex.total*ex.pct/100;}
+        else days.push({id:uid(),date:e.date,dogs,pct:e.pct||40,total:e.total||0,prov:e.prov||0});
+      });
+      days.sort((a,b)=>b.date.localeCompare(a.date));
+      localStorage.setItem('grm_days',JSON.stringify(days));
+      localStorage.setItem('grm_migrated','1');
+    }
+    return {pct: curPct};
+  }catch(e){return {pct:'40'};}
+}
+function savePct(p){try{localStorage.setItem('grm_pct',p);}catch(e){}}
+
+// ── toast ────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg,ms=2500){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),ms);
+}
+
+// ── form values ──────────────────────────────────────────
+function getDate(){return curDate||todayStr();}
+function getPct(){return parseFloat(curPct)||0;}
+function getName(){return document.getElementById('inp-name')?.value?.trim()||'';}
+function getBreed(){return document.getElementById('inp-breed')?.value?.trim()||'';}
+function getPrice(){return parseFloat(document.getElementById('inp-price')?.value)||0;}
+
+// ── actions ──────────────────────────────────────────────
+function addDog(){
+  const name=getName(),price=getPrice();
+  if(!name)return showToast('⚠️ Wpisz imię psa');
+  if(!price||price<=0)return showToast('⚠️ Wpisz cenę');
+  const breed=getBreed();
+  session.push({id:uid(),name,breed,price});
+  document.getElementById('inp-name').value='';
+  document.getElementById('inp-breed').value='';
+  document.getElementById('inp-price').value='';
+  renderDodaj();
+  setTimeout(()=>document.getElementById('inp-name')?.focus(),30);
+  showToast('✅ Dodano: '+name,1500);
+}
+
+function removeDogFromSession(id){
+  session=session.filter(d=>d.id!==id);
+  renderDodaj();
+}
+
+function saveDay(){
+  if(session.length===0)return showToast('⚠️ Dodaj co najmniej jednego psa');
+  const date=getDate(),pct=getPct();
+  const total=session.reduce((s,d)=>s+d.price,0);
+  const prov=total*pct/100;
+  const cnt=session.length;
+  const ex=days.find(d=>d.date===date);
+  if(ex){
+    ex.dogs=[...ex.dogs,...session];
+    ex.pct=pct;
+    ex.total=ex.dogs.reduce((s,d)=>s+d.price,0);
+    ex.prov=ex.total*pct/100;
+  } else {
+    days.push({id:uid(),date,dogs:[...session],pct,total,prov});
+  }
+  days.sort((a,b)=>b.date.localeCompare(a.date));
+  const ok=saveData();
+  savePct(String(pct));
+  if(!ok)return;
+  session=[];
+  activeMonth=date.slice(0,7);
+  curDate=todayStr();
+  renderDodaj();
+  showToast(`💾 Zapisano! ${cnt} psów · ${fmtPLN(prov)}`);
+}
+
+function deleteDay(id){
+  if(!confirm('Usunąć cały dzień?'))return;
+  days=days.filter(d=>d.id!==id);
+  saveData();
+  renderHistoria();
+  renderDodajStats();
+  showToast('🗑 Usunięto');
+}
+
+// ── render helpers ───────────────────────────────────────
+function allMonths(){
+  const s=new Set([todayStr().slice(0,7),...days.map(d=>monthKey(d.date))]);
+  return [...s].sort().reverse();
+}
+
+function renderChips(containerId,active,onClick){
+  const months=allMonths();
+  document.getElementById(containerId).innerHTML=months.map(m=>
+    `<div class="chip ${m===active?'active':''}" onclick="${onClick}('${m}')">${monthLabel(m)}</div>`
+  ).join('');
+}
+
+function dayBlockHTML(day,showDelete=false){
+  const dogsHTML=day.dogs.map((d,i)=>`
+    <div class="day-dog">
+      <span style="color:var(--ink2);font-size:13px;min-width:22px">${i+1}.</span>
+      <span style="flex:1;font-weight:700;font-size:14px">${d.name}${d.breed?`<span style="font-weight:400;color:var(--ink2);font-size:13px"> · ${d.breed}</span>`:''}</span>
+      <span style="font-family:monospace;font-size:13px">${fmtPLN(d.price)}</span>
+    </div>`).join('');
+  return `
+    <div class="day-block">
+      <div class="day-header">
+        <span class="day-hdate">📅 ${fmtDate(day.date)}</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="day-hinfo">${day.dogs.length} psów · ${fmtPLN(day.total)}</span>
+          ${showDelete?`<button class="btn btn-danger" onclick="deleteDay('${day.id}')">🗑</button>`:''}
+        </div>
+      </div>
+      ${dogsHTML}
+      <div class="day-footer">
+        <span class="day-footer-label">Prowizja ${day.pct}%</span>
+        <span class="day-footer-val">${fmtPLN(day.prov)}</span>
+      </div>
+    </div>`;
+}
+
+function statHTML(value,label,hi=false){
+  return `<div class="stat ${hi?'hi':''}"><div class="sv">${value}</div><div class="sl">${label}</div></div>`;
+}
+
+// ── render tabs ──────────────────────────────────────────
+function renderDodajStats(){
+  const cur=days.filter(d=>monthKey(d.date)===todayStr().slice(0,7));
+  const dogs=cur.reduce((s,d)=>s+d.dogs.length,0);
+  const total=cur.reduce((s,d)=>s+d.total,0);
+  const prov=cur.reduce((s,d)=>s+d.prov,0);
+  const el=document.getElementById('quick-stats');
+  if(el)el.innerHTML=`
+    <div class="section-title" style="color:var(--ink2);font-size:13px">📅 ${monthLabel(todayStr().slice(0,7))}</div>
+    <div class="stats3">
+      ${statHTML(dogs,'Psów')}
+      ${statHTML(fmtPLN(total),'Obrót')}
+      ${statHTML(fmtPLN(prov),'Prowizja',true)}
+    </div>`;
+}
+
+function renderDodaj(){
+  const pct=getPct();
+  const dayTotal=session.reduce((s,d)=>s+d.price,0);
+  const dayProv=dayTotal*pct/100;
+
+  const sessionHTML=session.length===0?'':`
+    <div class="card">
+      <div class="section-title">📋 Lista — ${fmtDate(getDate())}</div>
+      ${session.map((d,i)=>`
+        <div class="dog-row">
+          <div class="dog-num">${i+1}</div>
+          <div style="flex:1">
+            <div class="dog-name">${d.name}${d.breed?`<span class="dog-breed"> · ${d.breed}</span>`:''}</div>
+          </div>
+          <span style="font-family:monospace;font-weight:700">${fmtPLN(d.price)}</span>
+          <button class="btn btn-danger" onclick="removeDogFromSession('${d.id}')">×</button>
+        </div>`).join('')}
+      <div class="prov-box">
+        <div class="prov-sub">
+          <span>Psów: <b>${session.length}</b></span>
+          <span>Obrót: <b style="font-family:monospace">${fmtPLN(dayTotal)}</b></span>
+        </div>
+        <div class="prov-row">
+          <span class="prov-label">Prowizja (${pct}%)</span>
+          <span class="prov-value">${fmtPLN(dayProv)}</span>
+        </div>
+      </div>
+      <button class="btn btn-green" onclick="saveDay()">💾 Zapisz dzień (${session.length} psów)</button>
+    </div>`;
+
+  document.getElementById('tab-dodaj').innerHTML=`
+    <div class="card">
+      <div class="grid2">
+        <div><label class="lbl">Data wizyty</label>
+          <input type="date" id="inp-date" value="${curDate}" onchange="curDate=this.value||todayStr();renderDodaj()"></div>
+        <div><label class="lbl">Prowizja %</label>
+          <input type="number" id="inp-pct" value="${curPct}" onchange="curPct=this.value;savePct(this.value);renderDodaj()" min="0" max="100" step="0.5" inputmode="decimal" style="text-align:center;font-family:monospace"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sub-title">➕ Dodaj psa</div>
+      <div class="grid2">
+        <div><label class="lbl">Imię psa *</label>
+          <input type="text" id="inp-name" placeholder="np. Kiki" autocomplete="off"></div>
+        <div><label class="lbl">Rasa</label>
+          <input type="text" id="inp-breed" placeholder="np. York" autocomplete="off"></div>
+      </div>
+      <div style="margin-bottom:12px"><label class="lbl">Cena (zł) *</label>
+        <input type="number" id="inp-price" placeholder="0.00" min="0" step="0.01" inputmode="decimal" style="font-family:monospace"></div>
+      <button class="btn btn-light" onclick="addDog()">+ Dodaj do listy</button>
+    </div>
+    ${sessionHTML}
+    <div class="card" id="quick-stats"></div>`;
+
+  // bind enter key
+  setTimeout(()=>{
+    ['inp-name','inp-breed','inp-price'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.addEventListener('keydown',e=>{if(e.key==='Enter')addDog();});
+    });
+    renderDodajStats();
+  },0);
+}
+
+function renderMiesiac(){
+  const filtered=days.filter(d=>monthKey(d.date)===activeMonth);
+  const mDogs=filtered.reduce((s,d)=>s+d.dogs.length,0);
+  const mTotal=filtered.reduce((s,d)=>s+d.total,0);
+  const mProv=filtered.reduce((s,d)=>s+d.prov,0);
+
+  const daysHTML=filtered.length===0
+    ?`<div class="empty"><div class="empty-icon">🐾</div><p>Brak wpisów w tym miesiącu</p></div>`
+    :filtered.map(day=>dayBlockHTML(day,false)).join('')+`
+      <div class="total-bar">
+        <div><div class="total-bar-lbl">Prowizja łącznie</div>
+          <div class="total-bar-sub">${mDogs} psów · obrót ${fmtPLN(mTotal)}</div></div>
+        <div class="total-bar-val">${fmtPLN(mProv)}</div>
+      </div>`;
+
+  document.getElementById('tab-miesiac').innerHTML=`
+    <div id="chips-m" class="chips"></div>
+    <div class="card">
+      <div class="section-title">📊 ${monthLabel(activeMonth)}</div>
+      <div class="stats3">
+        ${statHTML(filtered.length,'Dni pracy')}
+        ${statHTML(mDogs,'Psów')}
+        ${statHTML(fmtPLN(mProv),'Prowizja',true)}
+      </div>
+      ${daysHTML}
+    </div>`;
+
+  renderChips('chips-m',activeMonth,'selectMonthM');
+}
+
+function renderHistoria(){
+  const filtered=days.filter(d=>monthKey(d.date)===activeMonth);
+  const daysHTML=filtered.length===0
+    ?`<div class="empty"><div class="empty-icon">🐾</div><p>Brak wpisów w tym miesiącu</p></div>`
+    :filtered.map(day=>dayBlockHTML(day,true)).join('');
+
+  document.getElementById('tab-historia').innerHTML=`
+    <div id="chips-h" class="chips"></div>
+    <div class="card">
+      <div class="section-title">📋 ${monthLabel(activeMonth)}</div>
+      ${daysHTML}
+    </div>`;
+
+  renderChips('chips-h',activeMonth,'selectMonthH');
+}
+
+function selectMonthM(m){activeMonth=m;renderMiesiac();}
+function selectMonthH(m){activeMonth=m;renderHistoria();}
+
+// ── tabs ─────────────────────────────────────────────────
+function showTab(name){
+  currentTab=name;
+  ['dodaj','miesiac','historia'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display=t===name?'block':'none';
+    document.querySelector(`.tab[data-tab="${t}"]`).classList.toggle('active',t===name);
+  });
+  if(name==='dodaj')renderDodaj();
+  if(name==='miesiac')renderMiesiac();
+  if(name==='historia')renderHistoria();
+}
+
+// ── init ─────────────────────────────────────────────────
+function init(){
+  const {pct}=loadData();
+  document.getElementById('app').innerHTML=`
+    <header>
+      <h1>🐾 Groomer Tracker</h1>
+      <p>Wpisuj psy · Śledź prowizje · Sumuj miesiąc</p>
+    </header>
+    <div class="tabs">
+      <button class="tab active" data-tab="dodaj" onclick="showTab('dodaj')">➕<br>Dodaj dzień</button>
+      <button class="tab" data-tab="miesiac" onclick="showTab('miesiac')">📊<br>Miesiąc</button>
+      <button class="tab" data-tab="historia" onclick="showTab('historia')">📋<br>Historia</button>
+    </div>
+    <div class="content">
+      <div id="tab-dodaj"></div>
+      <div id="tab-miesiac" style="display:none"></div>
+      <div id="tab-historia" style="display:none"></div>
+    </div>`;
+  renderDodaj();
+}
+
+init();
+</script>
+</body>
+</html>
